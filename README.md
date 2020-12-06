@@ -6,5 +6,7 @@ This is a module coded by the following tech stack:
 - Typescript
 - Jest
 
-### Scripts:
-- `test`: for running the unit tests
+### Steps to run the tests:
+1. `npm i`
+2. `npm t`
+
