@@ -2,17 +2,17 @@ import MarsRover from "./MarsRover";
 import {Direction} from "./types/RoverPosition";
 
 describe('MarsRover', () => {
-    describe('Initialisation', () => {
-        const commands = '5 69\n' + '1 2 N\n' + 'LMLMLMLMM\n' + '3 3 E\n' + 'MMRMMRMRRM';
+    const successfulCommands = '5 69\n' + '1 2 N\n' + 'LMLMLMLMM\n' + '3 3 E\n' + 'MMRMMRMRRM';
 
+    describe('Initialisation', () => {
         it('should accept a string of command as input', () => {
-            const rover = new MarsRover(commands);
-            expect(rover.rawCommands).toEqual(commands)
+            const rover = new MarsRover(successfulCommands);
+            expect(rover.rawCommands).toEqual(successfulCommands)
         });
 
         it('should call processCommands', () => {
             const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processCommands');
-            new MarsRover(commands);
+            new MarsRover(successfulCommands);
 
             expect(spy).toBeCalledTimes(1);
         });
@@ -20,21 +20,21 @@ describe('MarsRover', () => {
         describe('When processing input string', () => {
             it('should call processUpperRightCoordination', () => {
                 const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processUpperRightCoordination');
-                new MarsRover(commands);
+                new MarsRover(successfulCommands);
 
                 expect(spy).toBeCalledTimes(1);
             });
 
             it('should call processRoverInitialPosition twice', () => {
                 const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processRoverInitialPosition');
-                new MarsRover(commands);
+                new MarsRover(successfulCommands);
 
                 expect(spy).toBeCalledTimes(2);
             });
 
             it('should call processRoverMovements twice', () => {
                 const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processRoverMovements');
-                new MarsRover(commands);
+                new MarsRover(successfulCommands);
 
                 expect(spy).toBeCalledTimes(2);
             });
@@ -66,7 +66,7 @@ describe('MarsRover', () => {
                     });
                 });
                 describe('and Rover movement command is invalid', () => {
-                    const commandPrefix = '5 69\n' + '1 2 N\n' ;
+                    const commandPrefix = '5 69\n' + '1 2 N\n';
                     const invalidFormattedCommandsArray = [
                         'LMLMLMLMN',
                         'LMLM LM LMM',
@@ -80,13 +80,13 @@ describe('MarsRover', () => {
             });
             describe('and input is valid', () => {
                 it('should process upperRightCoordinates successfully', () => {
-                    const rover = new MarsRover(commands);
+                    const rover = new MarsRover(successfulCommands);
                     expect(rover.upperRightCoordination.x).toEqual(5);
                     expect(rover.upperRightCoordination.y).toEqual(69);
                 });
 
                 it('should process rovers initial positions successfully', () => {
-                    const rover = new MarsRover(commands);
+                    const rover = new MarsRover(successfulCommands);
                     expect(rover.roverPositions[0].coordination.x).toEqual(1);
                     expect(rover.roverPositions[0].coordination.y).toEqual(2);
                     expect(rover.roverPositions[0].direction).toEqual(Direction.north);
@@ -97,11 +97,36 @@ describe('MarsRover', () => {
                 });
 
                 it('should process rovers movements successfully', () => {
-                    const rover = new MarsRover(commands);
+                    const rover = new MarsRover(successfulCommands);
                     expect(rover.roverMovements[0]).toEqual('LMLMLMLMM');
                     expect(rover.roverMovements[1]).toEqual('MMRMMRMRRM');
                 });
             });
         });
+    });
+
+    describe('Execute', () => {
+        it('should call placeRover twice', () => {
+            const rover = new MarsRover(successfulCommands);
+            const spy = jest.spyOn<any, any>(MarsRover.prototype, 'placeRover').mockImplementation(() => {});
+            rover.execute();
+
+            expect(spy).toBeCalledTimes(2);
+        });
+
+        it('should call moveRover twice', () => {
+            const rover = new MarsRover(successfulCommands);
+            const spy = jest.spyOn<any, any>(MarsRover.prototype, 'moveRover').mockImplementation(() => {});
+            rover.execute();
+
+            expect(spy).toBeCalledTimes(2);
+        });
+
+        it('should error if the robot is going to be initialised in an occupied coordination', () => {
+            const commands = '5 69\n' + '1 2 N\n' + 'LR\n' + '1 2 N\n' + 'LR\n';
+            const rover = new MarsRover(commands);
+
+            expect(() => rover.execute()).toThrowError(new Error(`The coordination is already occupied`));
+        })
     });
 });

@@ -7,6 +7,7 @@ export default class MarsRover {
 
     private _roverPositions: RoverPosition[];
     private _roverMovements: string[];
+    private _grid: number[];
 
     constructor(rawCommands: string) {
         this.rawCommands = rawCommands;
@@ -14,6 +15,10 @@ export default class MarsRover {
         this.upperRightCoordination = upperRightCoordination;
         this._roverPositions = roverPositions;
         this._roverMovements = roverMovements;
+        this._grid = new Array(upperRightCoordination.x + 1).fill(
+            new Array(upperRightCoordination.y + 1)
+                .fill(null)
+        );
     }
 
     get roverPositions() {
@@ -25,7 +30,7 @@ export default class MarsRover {
     }
 
     private processCommands() {
-        const commands = this.rawCommands.split('\n');
+        const commands = this.rawCommands.trim().split('\n');
 
         if (commands.length === 0) {
             throw new Error('Invalid Commands String')
@@ -84,5 +89,24 @@ export default class MarsRover {
         }
 
         return roverMovements;
+    }
+
+    public execute() {
+        for (const roverIndex in this._roverPositions) {
+            this.placeRover(this._roverPositions[roverIndex], Number(roverIndex));
+            this.moveRover(this._roverMovements[roverIndex]);
+        }
+    }
+
+    private placeRover(roverPosition: RoverPosition, roverIndex: number) {
+        if (this._grid[roverPosition.coordination.x][roverPosition.coordination.y] !== null) {
+            throw new Error(`The coordination is already occupied`);
+        }
+
+        this._grid[roverPosition.coordination.x][roverPosition.coordination.y] = roverIndex;
+    }
+
+    private moveRover(roverMovement: string) {
+        return;
     }
 }
