@@ -6,16 +6,22 @@ export default class MarsRover {
     readonly upperRightCoordination: Coordination;
 
     private _roverPositions: RoverPosition[];
+    private _roverMovements: string[];
 
     constructor(rawCommands: string) {
         this.rawCommands = rawCommands;
-        const {upperRightCoordination, roverPositions} = this.processCommands();
+        const {upperRightCoordination, roverPositions, roverMovements} = this.processCommands();
         this.upperRightCoordination = upperRightCoordination;
         this._roverPositions = roverPositions;
+        this._roverMovements = roverMovements;
     }
 
     get roverPositions() {
         return this._roverPositions;
+    }
+
+    get roverMovements() {
+        return this._roverMovements;
     }
 
     private processCommands() {
@@ -27,17 +33,20 @@ export default class MarsRover {
 
         const upperRightCoordination = this.processUpperRightCoordination(commands[0])
         let roverPositions: RoverPosition[] = [];
+        let roverMovements: string[] = [];
 
         const roverPositionAndMovementCommands = commands.splice(1);
         for (let commandIndex = 0; commandIndex < Math.ceil(roverPositionAndMovementCommands.length / 2); commandIndex++) {
             const roverPositionIndex = (commandIndex * 2);
             const roverMovementsIndex = roverPositionIndex + 1;
-            roverPositions.push(this.processRoverInitialPosition(roverPositionAndMovementCommands[roverPositionIndex]))
+            roverPositions.push(this.processRoverInitialPosition(roverPositionAndMovementCommands[roverPositionIndex]));
+            roverMovements.push(this.processRoverMovements(roverPositionAndMovementCommands[roverMovementsIndex]));
         }
 
         return {
             upperRightCoordination,
-            roverPositions
+            roverPositions,
+            roverMovements
         }
     }
 
@@ -54,7 +63,7 @@ export default class MarsRover {
     }
 
     private processRoverInitialPosition(roverInitialPosition: string): RoverPosition {
-        const compiledRoverInitialPosition = (/^([1-9]\d*)\s([1-9]\d*)\s[WNESwnes]$/.exec(roverInitialPosition));
+        const compiledRoverInitialPosition = (/^([1-9]\d*)\s([1-9]\d*)\s([WNESwnes])$/.exec(roverInitialPosition));
         if (!compiledRoverInitialPosition) {
             throw new Error('Invalid Rover Initial Position')
         }
@@ -66,5 +75,14 @@ export default class MarsRover {
             },
             direction: compiledRoverInitialPosition[3] as Direction
         }
+    }
+
+    private processRoverMovements(roverMovements: string) {
+        const compiledRoverInitialPosition = (/^([LRMlrm])+$/.exec(roverMovements));
+        if (!compiledRoverInitialPosition) {
+            throw new Error('Invalid Rover Movement Command')
+        }
+
+        return roverMovements;
     }
 }

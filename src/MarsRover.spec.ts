@@ -18,6 +18,27 @@ describe('MarsRover', () => {
         });
 
         describe('When processing input string', () => {
+            it('should call processUpperRightCoordination', () => {
+                const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processUpperRightCoordination');
+                new MarsRover(commands);
+
+                expect(spy).toBeCalledTimes(1);
+            });
+
+            it('should call processRoverInitialPosition twice', () => {
+                const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processRoverInitialPosition');
+                new MarsRover(commands);
+
+                expect(spy).toBeCalledTimes(2);
+            });
+
+            it('should call processRoverMovements twice', () => {
+                const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processRoverMovements');
+                new MarsRover(commands);
+
+                expect(spy).toBeCalledTimes(2);
+            });
+
             describe('and input is invalid', () => {
                 describe('and upperRightCoordinates is wrong', () => {
                     it('should fail if the values are not following [Num1 Num2] pattern', () => {
@@ -31,20 +52,30 @@ describe('MarsRover', () => {
                     });
                 });
                 describe('and Rover initial position is invalid', () => {
+                    const commandPrefix = '5 69\n';
                     const invalidFormattedCommandsArray = [
-                        '5 56\n12 23 3',
-                        '5 56\n12 N 3',
-                        '5 56\n12 23 3',
-                        '5 56\n0 23 3',
-                        '5 56\n0 23 Z',
-                        '5 56\n12 0 3'
+                        '12 23 3',
+                        '12 N 3',
+                        '12 23 3',
+                        '0 23 3',
+                        '0 23 Z',
+                        '12 0 3'
                     ];
                     it.each(invalidFormattedCommandsArray)('should fail if the values are not following [Num1 Num2 Direction] pattern', (commands) => {
-                        expect(() => new MarsRover(commands)).toThrowError(new Error('Invalid Rover Initial Position'))
+                        expect(() => new MarsRover(commandPrefix + commands)).toThrowError(new Error('Invalid Rover Initial Position'))
                     });
                 });
-                it('Should fail on the invalid Rover movements', () => {
-
+                describe('and Rover movement command is invalid', () => {
+                    const commandPrefix = '5 69\n' + '1 2 N\n' ;
+                    const invalidFormattedCommandsArray = [
+                        'LMLMLMLMN',
+                        'LMLM LM LMM',
+                        'LMLMLML123MM',
+                        'LLqewqMLMLMM'
+                    ];
+                    it.each(invalidFormattedCommandsArray)('should fail if the values are not following [Num1 Num2 Direction] pattern', (commands) => {
+                        expect(() => new MarsRover(commandPrefix + commands)).toThrowError(new Error('Invalid Rover Movement Command'))
+                    });
                 });
             });
             describe('and input is valid', () => {
@@ -60,9 +91,15 @@ describe('MarsRover', () => {
                     expect(rover.roverPositions[0].coordination.y).toEqual(2);
                     expect(rover.roverPositions[0].direction).toEqual(Direction.north);
 
-                    expect(rover.roverPositions[0].coordination.x).toEqual(3);
-                    expect(rover.roverPositions[0].coordination.y).toEqual(3);
-                    expect(rover.roverPositions[0].direction).toEqual(Direction.east);
+                    expect(rover.roverPositions[1].coordination.x).toEqual(3);
+                    expect(rover.roverPositions[1].coordination.y).toEqual(3);
+                    expect(rover.roverPositions[1].direction).toEqual(Direction.east);
+                });
+
+                it('should process rovers movements successfully', () => {
+                    const rover = new MarsRover(commands);
+                    expect(rover.roverMovements[0]).toEqual('LMLMLMLMM');
+                    expect(rover.roverMovements[1]).toEqual('MMRMMRMRRM');
                 });
             });
         });
