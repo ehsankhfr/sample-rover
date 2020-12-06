@@ -1,5 +1,5 @@
 import MarsRover from "./MarsRover";
-import {Direction} from "./types/RoverPosition";
+import {Direction} from "./types/Direction";
 
 describe('MarsRover', () => {
     const successfulCommands = '5 69\n' + '1 2 N\n' + 'LMLMLMLMM\n' + '3 3 E\n' + 'MMRMMRMRRM';
@@ -108,7 +108,7 @@ describe('MarsRover', () => {
     describe('Execute', () => {
         it('should call placeRover twice', () => {
             const rover = new MarsRover(successfulCommands);
-            const spy = jest.spyOn<any, any>(MarsRover.prototype, 'placeRover').mockImplementation(() => {});
+            const spy = jest.spyOn<any, any>(MarsRover.prototype, 'placeRover');
             rover.execute();
 
             expect(spy).toBeCalledTimes(2);
@@ -116,17 +116,53 @@ describe('MarsRover', () => {
 
         it('should call moveRover twice', () => {
             const rover = new MarsRover(successfulCommands);
-            const spy = jest.spyOn<any, any>(MarsRover.prototype, 'moveRover').mockImplementation(() => {});
+            const spy = jest.spyOn<any, any>(MarsRover.prototype, 'moveRover');
             rover.execute();
 
             expect(spy).toBeCalledTimes(2);
         });
 
-        it('should error if the robot is going to be initialised in an occupied coordination', () => {
-            const commands = '5 69\n' + '1 2 N\n' + 'LR\n' + '1 2 N\n' + 'LR\n';
-            const rover = new MarsRover(commands);
+        describe('When executing invalid command', () => {
+            describe('When the rover is going to be initialised in an occupied coordination', () => {
+                const commandsArray = [
+                    '5 69\n' + '1 2 N\n' + 'LR\n' + '1 2 E\n' + 'LR\n',
+                    '5 69\n' + '1 69 N\n' + 'LR\n' + '1 69 E\n' + 'LR\n',
+                    '5 69\n' + '0 2 N\n' + 'LR\n' + '0 2 E\n' + 'LR\n'
+                ];
+                it.each(commandsArray)('Should error', (command) => {
+                    const rover = new MarsRover(command);
 
-            expect(() => rover.execute()).toThrowError(new Error(`The coordination is already occupied`));
-        })
+                    expect(() => rover.execute()).toThrowError(new Error(`The coordination is already occupied`));
+                });
+            });
+
+            describe('When the rover is going to move through an occupied coordination', () => {
+                const commandsArray = [
+                    '5 69\n' + '1 2 N\n' + 'MMMLMLMRL\n' + '0 5 N\n' + 'LLMM\n',
+                    '5 69\n' + '1 2 N\n' + 'LM\n' + '0 1 N\n' + 'MMMMMM\n',
+                    '5 69\n' + '1 2 N\n' + 'LR\n' + '2 2 E\n' + 'RMLLMLM\n'
+                ];
+                it.each(commandsArray)('Should error', (command) => {
+                    const rover = new MarsRover(command);
+
+                    expect(() => rover.execute()).toThrowError(new Error(`The coordination is already occupied`));
+                });
+            });
+
+            describe('When the rover is going to be initialised outside of grid', () => {
+                const commandsArray = [
+                    '5 69\n' + '10 2 N\n' + 'LR\n' + '0 2 E\n' + 'RR\n',
+                    '5 69\n' + '0 2 N\n' + 'LR\n' + '10 2 E\n' + 'RR\n',
+                    '5 6\n' + '1 20 N\n' + 'LR\n' + '0 2 E\n' + 'RR\n',
+                    '5 6\n' + '1 2 N\n' + 'LR\n' + '0 20 E\n' + 'RR\n'
+                ];
+                it.each(commandsArray)('Should error', (command) => {
+                    const rover = new MarsRover(command);
+
+                    expect(() => rover.execute()).toThrowError(new Error(`The coordination is outside of grid`));
+                });
+            });
+        });
+
     });
 });

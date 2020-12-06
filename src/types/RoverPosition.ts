@@ -1,11 +1,5 @@
 import {Coordination} from "./Coordination";
-
-export enum Direction {
-    east = 'E',
-    west = 'W',
-    north = 'N',
-    south = 'S'
-}
+import {Direction} from "./Direction";
 
 export interface RoverPosition {
     coordination: Coordination;
