@@ -1,4 +1,5 @@
 import MarsRover from "./MarsRover";
+import {Direction} from "./types/RoverPosition";
 
 describe('MarsRover', () => {
     describe('Initialisation', () => {
@@ -29,8 +30,18 @@ describe('MarsRover', () => {
                         expect(() => new MarsRover(commands)).toThrowError(new Error('Invalid Upper Right Coordinates'))
                     });
                 });
-                it('Should fail on the invalid Rover initial position', () => {
-
+                describe('and Rover initial position is invalid', () => {
+                    const invalidFormattedCommandsArray = [
+                        '5 56\n12 23 3',
+                        '5 56\n12 N 3',
+                        '5 56\n12 23 3',
+                        '5 56\n0 23 3',
+                        '5 56\n0 23 Z',
+                        '5 56\n12 0 3'
+                    ];
+                    it.each(invalidFormattedCommandsArray)('should fail if the values are not following [Num1 Num2 Direction] pattern', (commands) => {
+                        expect(() => new MarsRover(commands)).toThrowError(new Error('Invalid Rover Initial Position'))
+                    });
                 });
                 it('Should fail on the invalid Rover movements', () => {
 
@@ -38,9 +49,20 @@ describe('MarsRover', () => {
             });
             describe('and input is valid', () => {
                 it('should process upperRightCoordinates successfully', () => {
-                    const rover  = new MarsRover(commands);
+                    const rover = new MarsRover(commands);
                     expect(rover.upperRightCoordination.x).toEqual(5);
                     expect(rover.upperRightCoordination.y).toEqual(69);
+                });
+
+                it('should process rovers initial positions successfully', () => {
+                    const rover = new MarsRover(commands);
+                    expect(rover.roverPositions[0].coordination.x).toEqual(1);
+                    expect(rover.roverPositions[0].coordination.y).toEqual(2);
+                    expect(rover.roverPositions[0].direction).toEqual(Direction.north);
+
+                    expect(rover.roverPositions[0].coordination.x).toEqual(3);
+                    expect(rover.roverPositions[0].coordination.y).toEqual(3);
+                    expect(rover.roverPositions[0].direction).toEqual(Direction.east);
                 });
             });
         });
