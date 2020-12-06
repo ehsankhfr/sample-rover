@@ -3,6 +3,7 @@ import {RoverPosition} from "./types/RoverPosition";
 import {Direction, LeftDirection, RightDirection} from "./types/Direction";
 import Utils from "./helpers/Utils";
 import Processors from "./Processors";
+import {Movements} from "./types/Movements";
 
 export default class MarsRover {
     readonly rawCommands: string;
@@ -18,7 +19,7 @@ export default class MarsRover {
         this.upperRightCoordination = upperRightCoordination;
         this._roverPositions = roverPositions;
         this._roverMovements = roverMovements;
-        this._grid = this.generateGrid(upperRightCoordination)
+        this._grid = this.generateGrid(upperRightCoordination);
     }
 
     get roverPositions() {
@@ -57,29 +58,29 @@ export default class MarsRover {
 
     public execute() {
         for (const roverIndex in this._roverPositions) {
-            this.placeRover(roverIndex);
-            this._roverPositions[roverIndex] = this.moveRover(this._roverMovements[roverIndex], Number(roverIndex));
+            this.placeRover(Number(roverIndex));
+            this._roverPositions[roverIndex] = this.moveRover(Number(roverIndex));
         }
     }
 
-    private placeRover(roverIndex: string) {
-        this.validateCoordination(this._roverPositions[roverIndex].coordination, Number(roverIndex))
-        this.occupyCoordination(this._roverPositions[roverIndex].coordination, Number(roverIndex));
+    private placeRover(roverIndex: number) {
+        this.validateCoordination(this._roverPositions[roverIndex].coordination, roverIndex)
+        this.occupyCoordination(this._roverPositions[roverIndex].coordination, roverIndex);
     }
 
-    private moveRover(roverMovement: string, roverIndex: number): RoverPosition {
-        const moveCommands = roverMovement.split('');
+    private moveRover(roverIndex: number): RoverPosition {
+        const moveCommands = this._roverMovements[roverIndex].split('');
 
         let currentPosition: RoverPosition = Utils.cloneObject(this.roverPositions[roverIndex]);
         for (const move of moveCommands) {
             switch (move) {
-                case 'L':
+                case Movements.left:
                     currentPosition.direction = LeftDirection[currentPosition.direction] as unknown as Direction;
                     break;
-                case 'R':
+                case Movements.right:
                     currentPosition.direction = RightDirection[currentPosition.direction] as unknown as Direction;
                     break;
-                case 'M':
+                case Movements.move:
                     currentPosition.coordination = this.moveOneStep(currentPosition);
                     this.validateCoordination(currentPosition.coordination, roverIndex)
                     break;
@@ -136,8 +137,6 @@ export default class MarsRover {
     }
 
     private generateGrid(upperRightCoordination: Coordination) {
-        return new Array(upperRightCoordination.x + 1).fill(null).map(
-            () => new Array(upperRightCoordination.y + 1).fill(null)
-        );
+        return Utils.getTwoDimensionalNullArray(upperRightCoordination.x + 1, upperRightCoordination.y + 1);
     }
 }
