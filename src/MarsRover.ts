@@ -2,6 +2,7 @@ import {Coordination} from "./types/Coordination";
 import {RoverPosition} from "./types/RoverPosition";
 import {Direction, LeftDirection, RightDirection} from "./types/Direction";
 import Utils from "./helpers/Utils";
+import Processors from "./Processors";
 
 export default class MarsRover {
     readonly rawCommands: string;
@@ -35,7 +36,7 @@ export default class MarsRover {
             throw new Error('Invalid Commands String')
         }
 
-        const upperRightCoordination = this.processUpperRightCoordination(commands[0])
+        const upperRightCoordination = Processors.processUpperRightCoordination(commands[0])
         let roverPositions: RoverPosition[] = [];
         let roverMovements: string[] = [];
 
@@ -43,8 +44,8 @@ export default class MarsRover {
         for (let commandIndex = 0; commandIndex < Math.ceil(roverPositionAndMovementCommands.length / 2); commandIndex++) {
             const roverPositionIndex = (commandIndex * 2);
             const roverMovementsIndex = roverPositionIndex + 1;
-            roverPositions.push(this.processRoverInitialPosition(roverPositionAndMovementCommands[roverPositionIndex]));
-            roverMovements.push(this.processRoverMovements(roverPositionAndMovementCommands[roverMovementsIndex]));
+            roverPositions.push(Processors.processRoverInitialPosition(roverPositionAndMovementCommands[roverPositionIndex]));
+            roverMovements.push(Processors.processRoverMovements(roverPositionAndMovementCommands[roverMovementsIndex]));
         }
 
         return {
@@ -52,42 +53,6 @@ export default class MarsRover {
             roverPositions,
             roverMovements
         }
-    }
-
-    private processUpperRightCoordination(upperRightCoordination: string): Coordination {
-        const compiledUpperRightCoordinates = (/^([1-9]\d*)\s([1-9]\d*)$/.exec(upperRightCoordination));
-        if (!compiledUpperRightCoordinates) {
-            throw new Error('Invalid Upper Right Coordinates')
-        }
-
-        return {
-            x: Number(compiledUpperRightCoordinates[1]),
-            y: Number(compiledUpperRightCoordinates[2])
-        }
-    }
-
-    private processRoverInitialPosition(roverInitialPosition: string): RoverPosition {
-        const compiledRoverInitialPosition = (/^(\d+)\s(\d+)\s([WNESwnes])$/.exec(roverInitialPosition));
-        if (!compiledRoverInitialPosition) {
-            throw new Error('Invalid Rover Initial Position')
-        }
-
-        return {
-            coordination: {
-                x: Number(compiledRoverInitialPosition[1]),
-                y: Number(compiledRoverInitialPosition[2])
-            },
-            direction: compiledRoverInitialPosition[3] as Direction
-        }
-    }
-
-    private processRoverMovements(roverMovements: string) {
-        const compiledRoverInitialPosition = (/^([LRMlrm])+$/.exec(roverMovements));
-        if (!compiledRoverInitialPosition) {
-            throw new Error('Invalid Rover Movement Command')
-        }
-
-        return roverMovements;
     }
 
     public execute() {

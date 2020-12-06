@@ -1,5 +1,6 @@
 import MarsRover from "./MarsRover";
 import {Direction} from "./types/Direction";
+import Processors from "./Processors";
 
 describe('MarsRover', () => {
     const successfulCommands = '5 69\n' + '1 2 N\n' + 'LMLMLMLMM\n' + '3 3 E\n' + 'MMRMMRMRRM';
@@ -19,21 +20,21 @@ describe('MarsRover', () => {
 
         describe('When processing input string', () => {
             it('should call processUpperRightCoordination', () => {
-                const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processUpperRightCoordination');
+                const spy = jest.spyOn<any, any>(Processors, 'processUpperRightCoordination');
                 new MarsRover(successfulCommands);
 
                 expect(spy).toBeCalledTimes(1);
             });
 
             it('should call processRoverInitialPosition twice', () => {
-                const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processRoverInitialPosition');
+                const spy = jest.spyOn<any, any>(Processors, 'processRoverInitialPosition');
                 new MarsRover(successfulCommands);
 
                 expect(spy).toBeCalledTimes(2);
             });
 
             it('should call processRoverMovements twice', () => {
-                const spy = jest.spyOn<any, any>(MarsRover.prototype, 'processRoverMovements');
+                const spy = jest.spyOn<any, any>(Processors, 'processRoverMovements');
                 new MarsRover(successfulCommands);
 
                 expect(spy).toBeCalledTimes(2);
@@ -163,6 +164,5 @@ describe('MarsRover', () => {
                 });
             });
         });
-
     });
 });
